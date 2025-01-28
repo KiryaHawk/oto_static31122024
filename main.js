@@ -6,10 +6,6 @@ ymaps.ready(function () {
         controls: ['zoomControl', 'geolocationControl'] // Оставляем нужные элементы управления
     });
 
-    // Убираем multiTouch, но включаем перетаскивание и зум
-    myMap.behaviors.enable('drag'); // Включаем перетаскивание карты
-    myMap.behaviors.enable('zoom'); // Включаем зумирование карты
-
     // Создаем кластеризатор с макетом диаграмм
     const clusterer = new ymaps.Clusterer({
         clusterIconLayout: 'default#pieChart', // Макет диаграммы
