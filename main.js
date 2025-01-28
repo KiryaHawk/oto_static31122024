@@ -2,11 +2,9 @@ ymaps.ready(function () {
     const myMap = new ymaps.Map('map', {
         center: [55.751574, 37.573856], // Центр карты
         zoom: 9, // Уровень масштаба
-        controls: ['zoomControl', 'geolocationControl'] // Оставляем только нужные контролы
+        controls: ['zoomControl', 'geolocationControl'] // Контролы карты
     }, {
-        // Включаем мультитач масштабирование карты
-        multiTouch: true,
-        // Отключаем автоматический захват событий на метках
+        // Включаем мультитач для карты
         behaviors: ['default', 'multiTouch']
     });
 
@@ -16,7 +14,7 @@ ymaps.ready(function () {
         clusterIconPieChartCoreRadius: 10,
         clusterIconPieChartStrokeWidth: 3,
         hasBalloon: false, // Без всплывающего окна
-        interactivityModel: 'default#opaque' // Отключаем перехват событий
+        interactivityModel: 'default#geoObject' // Прокидываем события мультитач на карту
     });
 
     // Загружаем GeoJSON и создаем метки
@@ -37,7 +35,7 @@ ymaps.ready(function () {
                         {
                             preset: "islands#icon",
                             iconColor: feature.properties["marker-color"] || "#1E90FF",
-                            interactivityModel: 'default#opaque' // Отключаем перехват событий
+                            interactivityModel: 'default#geoObject' // Прокидываем события мультитач на карту
                         }
                     );
                 });
@@ -50,9 +48,9 @@ ymaps.ready(function () {
 
             // Обрабатываем нажатия на кластеры
             clusterer.events.add('click', function (e) {
-                const target = e.get('target'); // Получаем кластер
+                const target = e.get('target'); // Кластер, по которому кликнули
                 if (target && target.properties.get('geoObjects')) {
-                    // Если это кластер, то зуммируем карту к его границам
+                    // Если это кластер, зуммируем карту к его границам
                     myMap.setBounds(target.getBounds(), {
                         checkZoomRange: true
                     });
@@ -62,17 +60,11 @@ ymaps.ready(function () {
             // Обрабатываем нажатия на метки
             geoObjects.forEach(placemark => {
                 placemark.events.add('click', function () {
-                    // Открываем балун метки
-                    placemark.balloon.open();
+                    placemark.balloon.open(); // Открываем балун метки
                 });
             });
         })
         .catch(error => {
             console.error("Ошибка загрузки GeoJSON:", error);
         });
-
-    // Отключаем автоматическое масштабирование карты при касаниях меток
-    myMap.geoObjects.options.set({
-        interactivityModel: 'default#opaque'
-    });
 });
