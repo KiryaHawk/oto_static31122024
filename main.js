@@ -1,9 +1,9 @@
 ymaps.ready(function () {
+    // Создаем карту
     const myMap = new ymaps.Map('map', {
         center: [55.751574, 37.573856], // Центр карты (Москва)
-        zoom: 9 // Уровень масштаба
-    }, {
-        searchControlProvider: 'yandex#search' // Включаем провайдера поиска
+        zoom: 9, // Уровень масштаба
+        controls: ['zoomControl', 'geolocationControl'] // Убираем 'searchControl', оставляем только нужные элементы управления
     });
 
     // Создаем кластеризатор с макетом диаграмм
@@ -25,7 +25,7 @@ ymaps.ready(function () {
             placeholderContent: 'Введите адрес или название места' // Текст-заглушка в строке поиска
         }
     });
-    myMap.controls.add(searchControl); // Добавляем контрол на карту
+    myMap.controls.add(searchControl); // Добавляем новый контрол на карту
 
     // Загружаем GeoJSON и добавляем объекты на карту
     fetch('open.geojson') // Указываем путь к GeoJSON файлу
@@ -95,6 +95,11 @@ ymaps.ready(function () {
             alert("Не удалось загрузить файл GeoJSON. Проверьте, что файл находится в той же папке, что и index.html.");
         });
 
+    // Отключаем автоматическое перемещение карты при отправке поиска
+    searchControl.events.add('submit', function (e) {
+        e.preventDefault(); // Останавливаем стандартное поведение (перемещение на найденное место)
+    });
+
     // Обработка события выбора результата поиска
     searchControl.events.add('resultselect', function (e) {
         const index = e.get('index');
@@ -102,8 +107,9 @@ ymaps.ready(function () {
             const coords = res.geometry.getCoordinates();
             console.log('Выбранный объект:', res); // Лог результата поиска
 
-            // Центрируем карту на выбранном объекте
-            myMap.setCenter(coords, 14, { duration: 300 });
+            // Здесь не происходит перехода, только выводим информацию о выбранном объекте
+            const selectedAddress = res.get('text'); // Адрес выбранного места
+            alert("Вы выбрали: " + selectedAddress); // Просто выводим адрес
         });
     });
 
