@@ -10,6 +10,22 @@ ymaps.ready(function () {
     myMap.behaviors.enable('multiTouch'); // Включаем поддержку multi-touch для зумирования
     myMap.behaviors.disable('drag'); // Отключаем перетаскивание карты
 
+    // Переменная для отслеживания количества касаний
+    let touchCount = 0;
+
+    // Слушаем события касания
+    myMap.events.add('touchstart', function (e) {
+        touchCount = e.get('originalEvent').touches.length;
+    });
+
+    myMap.events.add('touchmove', function (e) {
+        touchCount = e.get('originalEvent').touches.length;
+    });
+
+    myMap.events.add('touchend', function () {
+        touchCount = 0; // Обнуляем количество касаний после завершения
+    });
+
     // Создаем кластеризатор с макетом диаграмм
     const clusterer = new ymaps.Clusterer({
         clusterIconLayout: 'default#pieChart', // Макет диаграммы
