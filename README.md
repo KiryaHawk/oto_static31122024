@@ -1,0 +1,1 @@
+# oto_static31122024.github.io
