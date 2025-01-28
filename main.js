@@ -1,8 +1,4 @@
 ymaps.ready(function () {
-    // Загружаем GeoJSON и добавляем объекты на карту
-    fetch('open.geojson') // Указываем путь к GeoJSON файлу
-        .then(arr => arr.json())
-    
     // Создаем карту
     const myMap = new ymaps.Map('map', {
         center: [55.751574, 37.573856], // Центр карты (Москва)
@@ -30,7 +26,15 @@ ymaps.ready(function () {
         }
     });
     myMap.controls.add(searchControl); // Добавляем новый контрол на карту
-    
+
+    // Загружаем GeoJSON и добавляем объекты на карту
+    fetch('open.geojson') // Указываем путь к GeoJSON файлу
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
         .then(geojsonData => {
             console.log("GeoJSON данные:", geojsonData); // Для проверки данных
 
