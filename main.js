@@ -8,6 +8,8 @@ ymaps.ready(function () {
 
     // Включаем поддержку multi-touch для зумирования
     myMap.behaviors.enable('multiTouch'); // Включаем поддержку multi-touch для зумирования
+
+    // Отключаем перетаскивание карты (чтобы оно не мешало зуму)
     myMap.behaviors.disable('drag'); // Отключаем перетаскивание карты
 
     // Создаем кластеризатор с макетом диаграмм
@@ -35,7 +37,7 @@ ymaps.ready(function () {
     fetch('open.geojson') // Указываем путь к GeoJSON файлу
         .then(response => {
             if (!response.ok) {
-                throw new Error(HTTP error! status: ${response.status});
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
             return response.json();
         })
