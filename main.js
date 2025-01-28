@@ -35,7 +35,7 @@ ymaps.ready(function () {
     fetch('open.geojson') // Указываем путь к GeoJSON файлу
         .then(response => {
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                throw new Error(HTTP error! status: ${response.status});
             }
             return response.json();
         })
