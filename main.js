@@ -3,9 +3,12 @@ ymaps.ready(function () {
     const myMap = new ymaps.Map('map', {
         center: [55.751574, 37.573856], // Центр карты (Москва)
         zoom: 9, // Уровень масштаба
-        controls: ['zoomControl', 'geolocationControl'], // Элементы управления
-        behaviors: ['default', 'multiTouch'] // Включаем мультитач-жесты
+        controls: ['zoomControl', 'geolocationControl'] // Оставляем нужные элементы управления
     });
+
+    // Включаем поддержку multi-touch для зумирования
+    myMap.behaviors.enable('multiTouch'); // Включаем поддержку multi-touch для зумирования
+    myMap.behaviors.disable('drag'); // Отключаем перетаскивание карты
 
     // Создаем кластеризатор с макетом диаграмм
     const clusterer = new ymaps.Clusterer({
@@ -13,8 +16,7 @@ ymaps.ready(function () {
         clusterIconPieChartRadius: 28, // Радиус диаграммы
         clusterIconPieChartCoreRadius: 13, // Радиус центральной части диаграммы
         clusterIconPieChartStrokeWidth: 3, // Ширина линий в диаграмме
-        hasBalloon: false, // Отключаем балуны для кластеров
-        interactivityModel: 'default#geoObject' // Прокидываем мультитач события на карту
+        hasBalloon: false // Без балуна для кластера
     });
 
     // Добавляем поиск по карте
@@ -53,10 +55,7 @@ ymaps.ready(function () {
                         },
                         {
                             preset: "islands#icon",
-                            iconColor: feature.properties["marker-color"] || "#1E90FF", // Цвет иконки из GeoJSON
-                            interactivityModel: 'default#geoObject', // Прокидываем события на карту
-                            zIndex: 1000, // Высокий Z-индекс для видимости
-                            interactiveZIndex: true // Включаем интерактивность по Z-индексу
+                            iconColor: feature.properties["marker-color"] || "#1E90FF" // Цвет иконки из GeoJSON
                         }
                     );
                 });
@@ -90,9 +89,14 @@ ymaps.ready(function () {
             // Добавляем кластеризатор на карту
             myMap.geoObjects.add(clusterer);
 
-            // Устанавливаем границы карты в зависимости от кластеров
+            // Устанавливаем границы карты в зависимости от кластеров и зумируем
             myMap.setBounds(clusterer.getBounds(), {
                 checkZoomRange: true
+            }).then(() => {
+                // Убедимся, что карта не слишком сильно отдалена
+                if (myMap.getZoom() > 10) {
+                    myMap.setZoom(10);
+                }
             });
         })
         .catch(error => {
