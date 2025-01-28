@@ -3,7 +3,7 @@ ymaps.ready(function () {
         center: [55.751574, 37.573856], // Центр карты (Москва)
         zoom: 9 // Уровень масштаба
     }, {
-        searchControlProvider: 'yandex#search'
+        searchControlProvider: 'yandex#search' // Включаем провайдера поиска
     });
 
     // Создаем кластеризатор с макетом диаграмм
@@ -14,6 +14,18 @@ ymaps.ready(function () {
         clusterIconPieChartStrokeWidth: 3, // Ширина линий в диаграмме
         hasBalloon: false // Без балуна для кластера
     });
+
+    // Добавляем поиск по карте
+    const searchControl = new ymaps.control.SearchControl({
+        options: {
+            float: 'right', // Расположение поиска
+            size: 'large', // Размер строки поиска
+            noPlacemark: true, // Отключаем добавление меток поиска
+            provider: 'yandex#map', // Используем провайдера Яндекса
+            placeholderContent: 'Введите адрес или название места' // Текст-заглушка в строке поиска
+        }
+    });
+    myMap.controls.add(searchControl); // Добавляем контрол на карту
 
     // Загружаем GeoJSON и добавляем объекты на карту
     fetch('open.geojson') // Указываем путь к GeoJSON файлу
@@ -82,4 +94,22 @@ ymaps.ready(function () {
             console.error("Ошибка загрузки GeoJSON:", error);
             alert("Не удалось загрузить файл GeoJSON. Проверьте, что файл находится в той же папке, что и index.html.");
         });
+
+    // Обработка события выбора результата поиска
+    searchControl.events.add('resultselect', function (e) {
+        const index = e.get('index');
+        searchControl.getResult(index).then(function (res) {
+            const coords = res.geometry.getCoordinates();
+            console.log('Выбранный объект:', res); // Лог результата поиска
+
+            // Центрируем карту на выбранном объекте
+            myMap.setCenter(coords, 14, { duration: 300 });
+        });
+    });
+
+    // Обработка ошибок при поиске
+    searchControl.events.add('error', function (e) {
+        console.error("Ошибка поиска:", e.get('error'));
+        alert("Произошла ошибка при выполнении поиска. Проверьте ваш запрос и повторите попытку.");
+    });
 });
