@@ -1,121 +1,78 @@
 ymaps.ready(function () {
-    // Создаем карту
     const myMap = new ymaps.Map('map', {
-        center: [55.751574, 37.573856], // Центр карты (Москва)
+        center: [55.751574, 37.573856], // Центр карты
         zoom: 9, // Уровень масштаба
-        controls: ['zoomControl', 'geolocationControl'] // Убираем 'searchControl', оставляем только нужные элементы управления
+        controls: ['zoomControl', 'geolocationControl'] // Оставляем только нужные контролы
+    }, {
+        // Включаем мультитач масштабирование карты
+        multiTouch: true,
+        // Отключаем автоматический захват событий на метках
+        behaviors: ['default', 'multiTouch']
     });
 
-    // Создаем кластеризатор с макетом диаграмм
     const clusterer = new ymaps.Clusterer({
-        clusterIconLayout: 'default#pieChart', // Макет диаграммы
-        clusterIconPieChartRadius: 25, // Радиус диаграммы
-        clusterIconPieChartCoreRadius: 10, // Радиус центральной части диаграммы
-        clusterIconPieChartStrokeWidth: 3, // Ширина линий в диаграмме
-        hasBalloon: false // Без балуна для кластера
+        clusterIconLayout: 'default#pieChart', // Макет кластеров
+        clusterIconPieChartRadius: 25,
+        clusterIconPieChartCoreRadius: 10,
+        clusterIconPieChartStrokeWidth: 3,
+        hasBalloon: false, // Без всплывающего окна
+        interactivityModel: 'default#opaque' // Отключаем перехват событий
     });
 
-    // Добавляем поиск по карте
-    const searchControl = new ymaps.control.SearchControl({
-        options: {
-            float: 'right', // Расположение поиска
-            size: 'large', // Размер строки поиска
-            noPlacemark: true, // Отключаем добавление меток поиска
-            provider: 'yandex#map', // Используем провайдера Яндекса
-            placeholderContent: 'Введите адрес или название места' // Текст-заглушка в строке поиска
-        }
-    });
-    myMap.controls.add(searchControl); // Добавляем новый контрол на карту
-
-    // Загружаем GeoJSON и добавляем объекты на карту
-    fetch('open.geojson') // Указываем путь к GeoJSON файлу
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.json();
-        })
+    // Загружаем GeoJSON и создаем метки
+    fetch('open.geojson')
+        .then(response => response.json())
         .then(geojsonData => {
-            console.log("GeoJSON данные:", geojsonData); // Для проверки данных
-
             const geoObjects = geojsonData.features
-                .filter(feature => feature.geometry.type === "Point") // Оставляем только точки
+                .filter(feature => feature.geometry.type === "Point") // Только точки
                 .map(feature => {
                     const coordinates = feature.geometry.coordinates;
                     return new ymaps.Placemark(
-                        [coordinates[1], coordinates[0]], // Меняем местами долготу и широту
+                        [coordinates[1], coordinates[0]], // Широта и долгота
                         {
                             hintContent: feature.properties.description,
                             balloonContent: feature.properties.description,
-                            markerColor: feature.properties["marker-color"] || "#1E90FF" // Цвет метки из GeoJSON
+                            markerColor: feature.properties["marker-color"] || "#1E90FF"
                         },
                         {
                             preset: "islands#icon",
-                            iconColor: feature.properties["marker-color"] || "#1E90FF" // Цвет иконки из GeoJSON
+                            iconColor: feature.properties["marker-color"] || "#1E90FF",
+                            interactivityModel: 'default#opaque' // Отключаем перехват событий
                         }
                     );
                 });
 
-            // Добавляем объекты в кластеризатор
+            // Добавляем метки в кластеризатор
             clusterer.add(geoObjects);
-
-            // Считаем пропорции сегментов (цветов) в кластере
-            clusterer.events.add('objectsadd', function () {
-                clusterer.getClusters().forEach(cluster => {
-                    const colorCounts = {};
-                    cluster.getGeoObjects().forEach(geoObject => {
-                        const color = geoObject.properties.get('markerColor');
-                        colorCounts[color] = (colorCounts[color] || 0) + 1;
-                    });
-
-                    const total = cluster.getGeoObjects().length;
-                    let offset = 0;
-
-                    const segments = Object.entries(colorCounts).map(([color, count]) => {
-                        const percent = (count / total) * 100;
-                        const segment = { color, percent, offset };
-                        offset += (percent / 100) * 360; // Угол в градусах
-                        return segment;
-                    });
-
-                    cluster.properties.set('segments', segments); // Устанавливаем сегменты для диаграммы
-                });
-            });
 
             // Добавляем кластеризатор на карту
             myMap.geoObjects.add(clusterer);
 
-            // Устанавливаем границы карты в зависимости от кластеров
-            myMap.setBounds(clusterer.getBounds(), {
-                checkZoomRange: true
+            // Обрабатываем нажатия на кластеры
+            clusterer.events.add('click', function (e) {
+                const target = e.get('target'); // Получаем кластер
+                if (target && target.properties.get('geoObjects')) {
+                    // Если это кластер, то зуммируем карту к его границам
+                    myMap.setBounds(target.getBounds(), {
+                        checkZoomRange: true
+                    });
+                }
+            });
+
+            // Обрабатываем нажатия на метки
+            geoObjects.forEach(placemark => {
+                placemark.events.add('click', function () {
+                    // Открываем балун метки
+                    placemark.balloon.open();
+                });
             });
         })
         .catch(error => {
             console.error("Ошибка загрузки GeoJSON:", error);
-            alert("Не удалось загрузить файл GeoJSON. Проверьте, что файл находится в той же папке, что и index.html.");
         });
 
-    // Отключаем автоматическое перемещение карты при отправке поиска
-    searchControl.events.add('submit', function (e) {
-        e.preventDefault(); // Останавливаем стандартное поведение (перемещение на найденное место)
-    });
-
-    // Обработка события выбора результата поиска
-    searchControl.events.add('resultselect', function (e) {
-        const index = e.get('index');
-        searchControl.getResult(index).then(function (res) {
-            const coords = res.geometry.getCoordinates();
-            console.log('Выбранный объект:', res); // Лог результата поиска
-
-            // Здесь не происходит перехода, только выводим информацию о выбранном объекте
-            const selectedAddress = res.get('text'); // Адрес выбранного места
-            alert("Вы выбрали: " + selectedAddress); // Просто выводим адрес
-        });
-    });
-
-    // Обработка ошибок при поиске
-    searchControl.events.add('error', function (e) {
-        console.error("Ошибка поиска:", e.get('error'));
-        alert("Произошла ошибка при выполнении поиска. Проверьте ваш запрос и повторите попытку.");
+    // Отключаем автоматическое масштабирование карты при касаниях меток
+    myMap.geoObjects.options.set({
+        interactivityModel: 'default#opaque'
     });
 });
