@@ -6,8 +6,9 @@ ymaps.ready(function () {
         controls: ['zoomControl', 'geolocationControl'] // Оставляем нужные элементы управления
     });
 
-    // Включаем поддержку multi-touch для зумирования
-    myMap.behaviors.enable('multiTouch'); // Включаем поддержку multi-touch для зумирования
+    // Убираем multiTouch, но включаем перетаскивание и зум
+    myMap.behaviors.enable('drag'); // Включаем перетаскивание карты
+    myMap.behaviors.enable('zoom'); // Включаем зумирование карты
 
     // Создаем кластеризатор с макетом диаграмм
     const clusterer = new ymaps.Clusterer({
@@ -125,22 +126,5 @@ ymaps.ready(function () {
     searchControl.events.add('error', function (e) {
         console.error("Ошибка поиска:", e.get('error'));
         alert("Произошла ошибка при выполнении поиска. Проверьте ваш запрос и повторите попытку.");
-    });
-
-    // Ожидаем двух касаний для зума
-    let touchCount = 0;
-
-    myMap.events.add('touchstart', function (e) {
-        touchCount = e.get('originalEvent').touches.length;
-    });
-
-    myMap.events.add('touchend', function (e) {
-        if (touchCount === 2) {
-            // Если два касания, разрешаем только зум
-            myMap.behaviors.enable('zoom'); // Включаем зум
-        } else {
-            // Если одно касание, разрешаем перемещение
-            myMap.behaviors.enable('drag'); // Включаем перетаскивание карты
-        }
     });
 });
