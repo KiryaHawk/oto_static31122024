@@ -8,7 +8,7 @@ ymaps.ready(function () {
 
     // Включаем поддержку multi-touch для зумирования
     myMap.behaviors.enable('multiTouch'); // Включаем поддержку multi-touch для зумирования
-    myMap.behaviors.enable('drag'); // Включаем перетаскивание карты (по умолчанию доступно только одно касание)
+    myMap.behaviors.enable('drag'); // Включаем перетаскивание карты с одним пальцем
 
     // Создаем кластеризатор с макетом диаграмм
     const clusterer = new ymaps.Clusterer({
