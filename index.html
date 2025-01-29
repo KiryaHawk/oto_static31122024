@@ -1,37 +1,29 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>oto_static31122024</title>
-    <!-- Добавляем API-ключ в строку подключения -->
-    <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU&apikey=3b8aa7fe-4a58-4c45-84f0-503ed957e939" type="text/javascript"></script>
-    <style>
-        /* Сброс отступов и высота страницы */
-        html, body {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-        }
-
-        /* Карта занимает всё окно */
-        #map {
-            width: 100%;
-            height: 100%;
-        }
-
-        /* Адаптивный дизайн для мобильных устройств */
-        @media (max-width: 767px) {
-            #map {
-                height: 100vh; /* Сделать карту полноэкранной на мобильных */
-            }
-        }
-    </style>
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+ <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU&apikey=3b8aa7fe-4a58-4c45-84f0-503ed957e939" type="text/javascript">
+    </script>
+    <title>oto_statistic_31122024</title>
 </head>
 <body>
-    <div id="map"></div>
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
 
-    <!-- Подключаем внешний JS файл -->
-    <script src="main.js"></script>
+    #map {
+        max-width: 100%;
+        width: auto;
+        height: 100vh;
+    }
+</style>
+<div id="map"></div>
+<script src="main.js"></script>
 </body>
 </html>
